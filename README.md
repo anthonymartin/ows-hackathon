@@ -17,6 +17,8 @@ Policies are **EMUs** (Executable Memory Units) — conditional rules that evalu
 - **Decision Traces** — Full audit trail of every gate decision.
 - **Starter Pack** — Five pre-built policies for common spend-gate scenarios out of the box.
 
+![Gate Simulator](docs/screenshot.png)
+
 ## Getting Started
 
 ```bash
