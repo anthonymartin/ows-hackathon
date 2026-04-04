@@ -2,11 +2,13 @@
 
 A policy studio for [Open Wallet Standard](https://openwallet.wiki) agents. Author, test, and manage deterministic spend-gate policies powered by [Memrail SOMA AMI](https://memrail.com).
 
-Policies are **EMUs** (Executable Memory Units) — conditional rules that evaluate against structured atoms and produce allow/deny verdicts at the gate.
+See live demo application at: https://ows-studio.memrail.com
+
+Policies are **EMUs** (Executable Memory Units) — conditional rules that evaluate against structured context and produce allow/deny verdicts at the gate.
 
 ## Features
 
-- **AI Composer** — Describe a policy in plain English, get a valid EMU back. Refine iteratively.
+- **AI Composer** — Describe a policy in plain English, get a valid policies back. Refine iteratively.
 - **Manual Editor** — Author policies directly in JSON with full trigger DSL control.
 - **Gate Simulator** — Build atom contexts, fire test decisions, inspect verdicts. Includes presets for common scenarios.
 - **Policy Inbox** — Browse, filter, and manage all registered policies.

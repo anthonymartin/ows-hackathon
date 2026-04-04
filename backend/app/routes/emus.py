@@ -13,6 +13,8 @@ async def list_emus(
     session: dict = Depends(get_session),
 ):
     return await proxy.list_emus(
+        org=session["org"],
+        team=session["team"],
         workspace=session["workspace"],
         project=session["project"],
     )
