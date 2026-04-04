@@ -72,7 +72,7 @@ function CollapsibleSection({
         {children}
       </div>
       {!expanded && (
-        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
       )}
       <button
         onClick={() => setExpanded(!expanded)}
