@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Shell } from "@/components/layout/shell";
 import { Card } from "@/components/ui/card";
@@ -44,6 +44,51 @@ function StepNumber({ n }: { n: number }) {
   return (
     <div className="w-7 h-7 rounded-full bg-[#1652F0] flex items-center justify-center flex-shrink-0">
       <span className="text-[12px] font-bold text-white tabular-nums">{n}</span>
+    </div>
+  );
+}
+
+function CollapsibleSection({
+  children,
+  previewLines = 6,
+  defaultOpen = false,
+}: {
+  children: React.ReactNode;
+  previewLines?: number;
+  defaultOpen?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(defaultOpen);
+  const contentRef = useRef<HTMLDivElement>(null);
+  // Approximate line height for code blocks is ~20px
+  const previewHeight = previewLines * 20 + 16; // +padding
+
+  return (
+    <div className="relative">
+      <div
+        ref={contentRef}
+        className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
+        style={{ maxHeight: expanded ? "5000px" : `${previewHeight}px` }}
+      >
+        {children}
+      </div>
+      {!expanded && (
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+      )}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="relative z-10 mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold text-[#1652F0] bg-[#F0F3FF] hover:bg-[#E0E7FF] transition-colors cursor-pointer"
+      >
+        <svg
+          className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="2.5"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+        {expanded ? "Show less" : "Show more"}
+      </button>
     </div>
   );
 }
@@ -373,7 +418,9 @@ export default function IntegratePage() {
               <CopyButton text={executableCode} />
             </div>
           </div>
-          <CodeBlock language="json">{executableCode}</CodeBlock>
+          <CollapsibleSection previewLines={8}>
+            <CodeBlock language="json">{executableCode}</CodeBlock>
+          </CollapsibleSection>
         </div>
 
         {/* Step 2 — Policy JSON */}
@@ -399,7 +446,9 @@ export default function IntegratePage() {
               <CopyButton text={policyJson} />
             </div>
           </div>
-          <CodeBlock language="json">{policyJson}</CodeBlock>
+          <CollapsibleSection previewLines={8}>
+            <CodeBlock language="json">{policyJson}</CodeBlock>
+          </CollapsibleSection>
         </div>
 
         {/* Step 3 — CLI */}
@@ -428,29 +477,33 @@ export default function IntegratePage() {
               <h4 className="text-[13px] font-semibold text-zinc-900 tracking-[-0.01em]">
                 How it works
               </h4>
-              <p className="text-[13px] text-zinc-500 leading-relaxed">
-                OWS injects the policy file&apos;s <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">config</code> as <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">policy_config</code> into
-                the JSON piped to stdin. The executable decodes <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">transaction.raw_hex</code> (RLP)
-                to extract <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">to</code>, <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">value</code>, and <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">data</code> since
-                OWS currently only populates the raw hex in the signing path.
-              </p>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                {[
-                  ["api_key", "Your workspace-scoped Memrail API key"],
-                  ["workspace / project", "Memrail org scope for EMU evaluation"],
-                  ["usd_rate", "Token-to-USD conversion rate (e.g., 2500 for ETH)"],
-                  ["decimals", "Token decimals for wei conversion (18 for ETH)"],
-                  ["decision_point", "Gate identifier matching your EMU triggers"],
-                  ["extra_context", "Static context injected on every request"],
-                ].map(([key, desc]) => (
-                  <div key={key} className="flex items-start gap-2 py-1">
-                    <code className="text-[11px] font-mono text-[#1652F0] bg-[#F0F3FF] px-1.5 py-0.5 rounded flex-shrink-0">
-                      {key}
-                    </code>
-                    <span className="text-[12px] text-zinc-500">{desc}</span>
+              <CollapsibleSection previewLines={4}>
+                <div className="space-y-4">
+                  <p className="text-[13px] text-zinc-500 leading-relaxed">
+                    OWS injects the policy file&apos;s <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">config</code> as <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">policy_config</code> into
+                    the JSON piped to stdin. The executable decodes <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">transaction.raw_hex</code> (RLP)
+                    to extract <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">to</code>, <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">value</code>, and <code className="px-1.5 py-0.5 rounded bg-zinc-100 text-[12px] font-mono text-zinc-700">data</code> since
+                    OWS currently only populates the raw hex in the signing path.
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                    {[
+                      ["api_key", "Your workspace-scoped Memrail API key"],
+                      ["workspace / project", "Memrail org scope for EMU evaluation"],
+                      ["usd_rate", "Token-to-USD conversion rate (e.g., 2500 for ETH)"],
+                      ["decimals", "Token decimals for wei conversion (18 for ETH)"],
+                      ["decision_point", "Gate identifier matching your EMU triggers"],
+                      ["extra_context", "Static context injected on every request"],
+                    ].map(([key, desc]) => (
+                      <div key={key} className="flex items-start gap-2 py-1">
+                        <code className="text-[11px] font-mono text-[#1652F0] bg-[#F0F3FF] px-1.5 py-0.5 rounded flex-shrink-0">
+                          {key}
+                        </code>
+                        <span className="text-[12px] text-zinc-500">{desc}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              </CollapsibleSection>
             </div>
           </Card>
         </div>
@@ -462,36 +515,40 @@ export default function IntegratePage() {
               <h4 className="text-[13px] font-semibold text-zinc-900 tracking-[-0.01em]">
                 Context Mapping
               </h4>
-              <p className="text-[13px] text-zinc-500">
-                The executable maps OWS PolicyContext fields to Memrail context:
-              </p>
-              <div className="rounded-xl overflow-hidden border border-zinc-800/50">
-                <table className="w-full text-[12px] font-mono">
-                  <thead>
-                    <tr className="bg-[#1A1D24] text-zinc-400">
-                      <th className="text-left px-4 py-2.5 font-medium">OWS Field</th>
-                      <th className="text-left px-4 py-2.5 font-medium">Memrail Context</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-[#1E2028]">
-                    {[
-                      ["chain_id", "state.chain_id"],
-                      ["wallet_id", "state.wallet_id"],
-                      ["api_key_id", "state.api_key_id"],
-                      ["transaction.raw_hex → to", "state.request.to"],
-                      ["transaction.raw_hex → value", "state.request.value"],
-                      ["value (wei → USD)", "state.request.amount"],
-                      ["spending.daily_total", "state.spending.daily_total"],
-                      ["daily_total (wei → USD)", "state.budget.daily_spent"],
-                    ].map(([ows, atom], i) => (
-                      <tr key={i} className="border-t border-zinc-700/30">
-                        <td className="px-4 py-2 text-zinc-400">{ows}</td>
-                        <td className="px-4 py-2 text-[#73DACA]">{atom}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <CollapsibleSection previewLines={4}>
+                <div className="space-y-4">
+                  <p className="text-[13px] text-zinc-500">
+                    The executable maps OWS PolicyContext fields to Memrail context:
+                  </p>
+                  <div className="rounded-xl overflow-hidden border border-zinc-800/50">
+                    <table className="w-full text-[12px] font-mono">
+                      <thead>
+                        <tr className="bg-[#1A1D24] text-zinc-400">
+                          <th className="text-left px-4 py-2.5 font-medium">OWS Field</th>
+                          <th className="text-left px-4 py-2.5 font-medium">Memrail Context</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-[#1E2028]">
+                        {[
+                          ["chain_id", "state.chain_id"],
+                          ["wallet_id", "state.wallet_id"],
+                          ["api_key_id", "state.api_key_id"],
+                          ["transaction.raw_hex → to", "state.request.to"],
+                          ["transaction.raw_hex → value", "state.request.value"],
+                          ["value (wei → USD)", "state.request.amount"],
+                          ["spending.daily_total", "state.spending.daily_total"],
+                          ["daily_total (wei → USD)", "state.budget.daily_spent"],
+                        ].map(([ows, atom], i) => (
+                          <tr key={i} className="border-t border-zinc-700/30">
+                            <td className="px-4 py-2 text-zinc-400">{ows}</td>
+                            <td className="px-4 py-2 text-[#73DACA]">{atom}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </CollapsibleSection>
             </div>
           </Card>
         </div>
