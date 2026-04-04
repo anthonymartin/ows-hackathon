@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ows-studio-api
+  namespace: ows-studio
+  labels:
+    app: ows-studio-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ows-studio-api
+  template:
+    metadata:
+      labels:
+        app: ows-studio-api
+    spec:
+      containers:
+        - name: api
+          image: 10.26.1.201:5000/ows-studio-api:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: ows-studio-config
+            - secretRef:
+                name: ows-studio-secrets
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

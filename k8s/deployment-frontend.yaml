@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ows-studio-frontend
+  namespace: ows-studio
+  labels:
+    app: ows-studio-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ows-studio-frontend
+  template:
+    metadata:
+      labels:
+        app: ows-studio-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: 10.26.1.201:5000/ows-studio-frontend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: API_URL
+              value: "http://ows-studio-api:8080"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"

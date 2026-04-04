@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ows-studio-api
+  namespace: ows-studio
+spec:
+  selector:
+    app: ows-studio-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ows-studio-frontend
+  namespace: ows-studio
+spec:
+  selector:
+    app: ows-studio-frontend
+  ports:
+    - port: 3000
+      targetPort: 3000

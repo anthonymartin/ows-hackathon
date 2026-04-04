@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ows-studio-config
+  namespace: ows-studio
+data:
+  APP_ENV: "production"
+  CORS_ORIGINS: "https://ows-studio.memrail.com"
+  MEMRAIL_BASE_URL: "https://api.memrail.com"
+  MEMRAIL_ORG: "ows"
+  MEMRAIL_TEAM: "default"

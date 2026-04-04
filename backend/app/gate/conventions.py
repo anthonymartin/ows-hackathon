@@ -1,0 +1,5 @@
+GATE_TOOL_ALLOW = "policy.allow"
+GATE_TOOL_DENY = "policy.deny"
+GATE_TOOL_IDS = {GATE_TOOL_ALLOW, GATE_TOOL_DENY}
+GATE_EXCLUSION_GROUP = "gate_verdict"
+GATE_DECISION_POINT = "ows-gate"
