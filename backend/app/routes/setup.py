@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from memrail import AsyncAMIClient
 
 from app.config import settings
 from app.db import get_db
@@ -96,27 +97,38 @@ async def bootstrap(
         runtime_key = settings.memrail_admin_api_key
         runtime_key_id = "platform-key"
 
-        # Create a workspace-scoped integration key via admin API
-        try:
-            ws_id = await proxy.get_workspace_id(workspace)
-            key_result = await proxy.create_workspace_key(ws_id, "OWS Integration Key")
-            integration_key = key_result.get("secret")
-            integration_key_id = key_result.get("key_id")
-        except Exception as e:
-            logger.warning("Failed to create integration key on re-bootstrap: %s", e)
+        # Re-bootstrap: return previously stored integration key if available,
+        # otherwise fall back to the platform admin key (which gate.py also accepts)
+        stored_key_id, stored_secret = await _load_integration_key()
+        if stored_secret:
+            integration_key = stored_secret
+            integration_key_id = stored_key_id
+        else:
+            integration_key = settings.memrail_admin_api_key
+            integration_key_id = "platform-key"
 
     # Store integration key in DB
     if integration_key and integration_key_id:
         await _store_integration_key(integration_key_id, integration_key)
 
-    # Register starter pack EMUs
+    # Register starter pack EMUs using the org's own key
+    # (the platform key's org headers won't match a newly created org)
     registered = 0
-    for emu in STARTER_EMUS:
-        try:
-            await proxy.register_emu(workspace, project, emu)
-            registered += 1
-        except Exception:
-            pass  # EMU may already exist
+    emu_key = runtime_key or settings.memrail_admin_api_key
+    async with AsyncAMIClient(
+        api_key=emu_key,
+        base_url=settings.memrail_base_url,
+        org=org,
+        team=team,
+        use_env=False,
+    ) as emu_client:
+        emu_proxy = MemrailProxy(emu_client)
+        for emu in STARTER_EMUS:
+            try:
+                await emu_proxy.register_emu(workspace, project, emu)
+                registered += 1
+            except Exception:
+                pass  # EMU may already exist
 
     # Create session token
     token = SessionService.create_token(

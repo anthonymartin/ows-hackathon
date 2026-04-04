@@ -13,7 +13,13 @@ async def list_traces(
     session: dict = Depends(get_session),
 ):
     try:
-        return await proxy.list_traces(limit=limit)
+        return await proxy.list_traces(
+            limit=limit,
+            org=session["org"],
+            team=session["team"],
+            workspace=session["workspace"],
+            project=session["project"],
+        )
     except Exception:
         return []
 

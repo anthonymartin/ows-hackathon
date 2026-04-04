@@ -79,13 +79,12 @@ class MemrailProxy:
             project=project,
         )
 
-    async def list_emus(self, workspace: str | None = None, project: str | None = None) -> list[dict]:
-        # Use workspace-scoped endpoint to ensure only this project's EMUs are returned
-        # (the global /v1/emus endpoint with query params doesn't filter reliably with admin keys)
-        ws = workspace or self.client.config.workspace or "development"
-        proj = project or self.client.config.project or "default"
-        result = await self.client.transport.get(
-            f"/v1/workspaces/{ws}/projects/{proj}/emus?limit=100",
+    async def list_emus(self, org: str | None = None, team: str | None = None, workspace: str | None = None, project: str | None = None) -> list[dict]:
+        result = await self.client.list_emus(
+            org=org or self.client.config.org,
+            team=team or self.client.config.team,
+            workspace=workspace,
+            project=project,
         )
         # Normalize API response to match frontend expectations
         emus = []
@@ -228,11 +227,20 @@ class MemrailProxy:
         }
         return result
 
-    async def list_traces(self, limit: int = 50) -> list[dict]:
+    async def list_traces(self, limit: int = 50, org: str | None = None, team: str | None = None, workspace: str | None = None, project: str | None = None) -> list[dict]:
         """List recent traces via the Memrail API (not exposed in SDK)."""
+        params: dict = {"limit": limit}
+        if org:
+            params["org"] = org
+        if team:
+            params["team"] = team
+        if workspace:
+            params["workspace"] = workspace
+        if project:
+            params["project"] = project
         result = await self.client.transport.get(
             "/v1/traces",
-            params={"limit": limit},
+            params=params,
         )
         return result.get("traces", [])
 
