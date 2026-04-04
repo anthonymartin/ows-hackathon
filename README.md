@@ -4,6 +4,8 @@ A policy studio for [Open Wallet Standard](https://openwallet.wiki) agents. Auth
 
 See live demo application at: https://ows-studio.memrail.com
 
+![OWS Policy Studio](docs/hero.png)
+
 Policies are **EMUs** (Executable Memory Units) — conditional rules that evaluate against structured context and produce allow/deny verdicts at the gate.
 
 ## Features
