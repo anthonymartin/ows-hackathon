@@ -18,6 +18,7 @@ Policies are **EMUs** (Executable Memory Units) — conditional rules that evalu
 - **Starter Pack** — Five pre-built policies for common spend-gate scenarios out of the box.
 
 ![Gate Simulator](docs/screenshot.png)
+![AI Composer](docs/screenshot-2.png)
 
 ## Getting Started
 
