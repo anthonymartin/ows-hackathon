@@ -1,19 +1,25 @@
 FROM node:22.23.4-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 AS base
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Use vendor CA packages in every build stage and in the final runtime.
+RUN apk add --no-cache --upgrade \
+      'ca-certificates>=20261020-r0' 'ca-certificates-bundle>=20261020-r0' \
+    && update-ca-certificates
 
-FROM base AS deps
+FROM base AS tooling
+RUN corepack enable && corepack prepare pnpm@12.15.0 --activate
+
+FROM tooling AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile 2>/dev/null || pnpm install
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
-FROM base AS builder
+FROM tooling AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm build
+RUN mkdir -p public && pnpm build
 
-FROM node:22.23.4-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 AS runner
+FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

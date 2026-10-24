@@ -1,0 +1,5 @@
+# Approve only the native dependency already pinned by the lockfile.
+# A different native build must receive its own review.
+allowBuilds:
+  sharp@0.34.5: true
+strictDepBuilds: true
