@@ -29,3 +29,19 @@ Keep the package floors and regression checks in normal upgrades. A source
 merge or successful image build alone does not prove deployment. Downstream
 operators retain their own immutable image identities and retirement evidence;
 private deployment/recovery records do not belong in this public repository.
+
+## Validation — 2026-10-24
+
+The clean Linux amd64 image built from `632f7392b5bd57b55527a7c07f7b7756925a5eb0`.
+The pnpm toolchain lock document is new; the application's original importers,
+package versions/integrities and snapshots are unchanged. The build now creates
+an empty optional `public` directory when the checkout has no assets there.
+
+The final image passed vendor package floors, 28 native TLS checks across the
+two trust modes, unrelated private-root acceptance/rejection in both modes and
+all twelve captured-chain checks with valid positive controls. An isolated
+container passed seven HTTP 200 routes plus the source-defined root redirect
+to `/setup`. An initial health check incorrectly required root 200; that failed
+result is retained separately from the corrected, source-matched check.
+TypeScript and Next's production build completed successfully. API integration,
+authenticated workflows and live adoption were not exercised by these checks.
